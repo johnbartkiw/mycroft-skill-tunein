@@ -6,7 +6,7 @@ https://rawgit.com/MycroftAI/mycroft-skills/master/meta_editor.html
 Internet radio streaming using tunein stations
 
 ## Description 
-Make internet radio streaming work 
+Make internet radio streaming work with non-hard coded stations
 
 ## Examples 
 * "Play KEXP"
