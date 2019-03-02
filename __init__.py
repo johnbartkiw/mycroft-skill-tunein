@@ -44,10 +44,10 @@ class TuneinSkill(MycroftSkill):
         self.url = None
 
     @intent_file_handler('StreamRequest.intent')
-    def handle_hello_world_intent(self, message):
+    def handle_stream_intent(self, message):
         self.find_station("KEXP")
-        LOG.debug("Message data: " . message)
-        LOG.debug("Station data: " . message.data["station"])
+        LOG.debug("Message data: " + message)
+        LOG.debug("Station data: " + message.data["station"])
 
 
     # Attempt to find the first active station matching the query string
@@ -69,13 +69,13 @@ class TuneinSkill(MycroftSkill):
                         self.station_name = entry.getAttribute("text")
                         self.audio_state = "playing"
                         self.speak_dialog("now.playing", {"station": self.station_name} )
-                        LOG.debug("Found stream URL: " . self.url)
+                        LOG.debug("Found stream URL: " + self.url)
                         print ("TODO: Start Music here")
                         break
 
         # We didn't find any playable stations
         self.speak_dialog("not.found")
-        LOG.debug("Could not find a station with the query term: " . search_term)
+        LOG.debug("Could not find a station with the query term: " + search_term)
 
     def stop(self):
         if self.audio_state == "playing":
