@@ -51,7 +51,7 @@ class TuneinSkill(MycroftSkill):
 
 
     # Attempt to find the first active station matching the query string
-    def find_station(search_term):
+    def find_station(self, search_term):
         payload = { "query" : search_term }
         # get the response from the TuneIn API
         res = requests.post(url, data=payload, headers=headers)
