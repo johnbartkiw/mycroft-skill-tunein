@@ -69,9 +69,8 @@ class TuneinSkill(CommonPlaySkill):
         for entry in entries:
             # Only look at outlines that are of type=audio and item=station
             if (entry.getAttribute("type") == "audio") and (entry.getAttribute("item") == "station"):
-                    if (entry.getAttribute("key") == "unavailable"):
+                    if (entry.getAttribute("key") != "unavailable"):
                         # Ignore entries that are marked as unavailable
-                    else:
                         self.url = entry.getAttribute("URL")
                         self.station_name = entry.getAttribute("text")
                         self.audio_state = "playing"
