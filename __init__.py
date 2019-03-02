@@ -45,7 +45,7 @@ class TuneinSkill(MycroftSkill):
 
     @intent_file_handler('StreamRequest.intent')
     def handle_stream_intent(self, message):
-        self.find_station("KEXP")
+        self.find_station(message.data["station"])
         LOG.debug("Station data: " + message.data["station"])
 
 
