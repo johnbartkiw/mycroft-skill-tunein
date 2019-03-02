@@ -1,17 +1,14 @@
-To submit your skill, replace this file with text from 
-https://rawgit.com/MycroftAI/mycroft-skills/master/meta_editor.html
-
 
 ## mycroft-skill-tunein
-Internet radio streaming using tunein stations
+Search Tune In for Internet radio streaming stations
 
-## Description 
+## Description
 Make internet radio streaming work with non-hard coded stations
 
-## Examples 
-* "Play KEXP"
-* "Play Jack FM"
-* "Play Jazz 24"
+## Examples
+* "Search TuneIn for  KEXP"
+* "Search TuneIn for Jack FM"
+* "Search TuneIn Jazz 24"
 
-## Credits 
+## Credits
 John Bartkiw

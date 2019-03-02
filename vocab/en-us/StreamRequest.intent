@@ -1,0 +1,10 @@
+stream {station}
+stream {station} radio
+stream {station} internet radio
+stream {station} (on|with|using) tune in
+stream {station} radio (on|with|using) tune in
+stream {station} internet radio (on|with|using) tune in
+stream {station} radio station
+stream {station} internet radio station
+stream {station} radio station (on|with|using) tune in
+stream {station} internet radio station (on|with|using) tune in

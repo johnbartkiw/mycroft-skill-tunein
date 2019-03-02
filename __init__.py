@@ -24,38 +24,31 @@ import requests
 from xml.dom.minidom import parseString
 
 from adapt.intent import IntentBuilder
-from mycroft.skills.core import intent_handler
+from mycroft.skills.core import MycroftSkill, intent_handler
 from mycroft.util.log import LOG
 
 from mycroft.audio import wait_while_speaking
 from mycroft.messagebus.message import Message
-from mycroft.skills.common_play_skill import CommonPlaySkill, CPSMatchLevel
 
 # Static values for tunein search requests
 base_url = "http://opml.radiotime.com/Search.ashx"
 headers = {}
 
-class TuneinSkill(CommonPlaySkill):
+class TuneinSkill(MycroftSkill):
 
     def __init__(self):
-        super().__init__(name="TuneinSkill")
+        super(TuneinSkill, self).__init__(name="TuneinSkill")
 
         self.audio_state = "stopped"  # 'playing', 'paused', 'stopped'
         self.station_name = None
         self.url = None
 
-    @intent_handler(IntentBuilder("").require("Station").require("TuneIn"))
-    def handle_station_search_intent(self, message):
-        # In this case, respond by simply speaking a canned response.
-        # Mycroft will randomly speak one of the lines from the file
-        #    dialogs/en-us/hello.world.dialog
-        self.find_station("Jazz 24")
+    @intent_file_handler('StreamRequest.intent')
+    def handle_hello_world_intent(self, message):
+        find_station("KEXP")
+        LOG.debug("Message data: " . message)
+        LOG.debug("Station data: " . message.data["station"])
 
-    def stop(self):
-        self.audio_state = "stopped"
-        self.station_name = None
-        self.url = None
-        return True
 
     # Attempt to find the first active station matching the query string
     def find_station(search_term):
@@ -75,10 +68,20 @@ class TuneinSkill(CommonPlaySkill):
                         self.station_name = entry.getAttribute("text")
                         self.audio_state = "playing"
                         self.speak_dialog("now.playing", {"station": self.station_name} )
+                        LOG.debug("Found stream URL: " . self.url)
                         break
 
         # We didn't find any playable stations
         self.speak_dialog("not.found")
+        LOG.debug("Could not find a station with the query term: " . search_term)
+
+    def stop(self):
+        if self.audio_state == "playing":
+            print ("TODO: Stop Music here")
+        self.audio_state = "stopped"
+        self.station_name = None
+        self.url = None
+        return True
 
 def create_skill():
     return TuneinSkill()
