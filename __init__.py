@@ -46,7 +46,6 @@ class TuneinSkill(MycroftSkill):
     @intent_file_handler('StreamRequest.intent')
     def handle_stream_intent(self, message):
         self.find_station("KEXP")
-        LOG.debug("Message data: " + message)
         LOG.debug("Station data: " + message.data["station"])
 
 
@@ -71,7 +70,7 @@ class TuneinSkill(MycroftSkill):
                         self.speak_dialog("now.playing", {"station": self.station_name} )
                         LOG.debug("Found stream URL: " + self.url)
                         print ("TODO: Start Music here")
-                        break
+                        return
 
         # We didn't find any playable stations
         self.speak_dialog("not.found")
