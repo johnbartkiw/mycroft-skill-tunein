@@ -55,6 +55,7 @@ class TuneinSkill(MycroftSkill):
         payload = { "query" : search_term }
         # get the response from the TuneIn API
         res = requests.post(base_url, data=payload, headers=headers)
+        dom = parseString(res.text)
         # results are each in their own <outline> tag as defined by OPML (https://en.wikipedia.org/wiki/OPML)
         entries = dom.getElementsByTagName("outline")
 
