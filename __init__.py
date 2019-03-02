@@ -45,7 +45,7 @@ class TuneinSkill(MycroftSkill):
         self.url = None
 
     def initialize(self):
-        self.audio_service = AudioService(self.emitter)
+        self.audio_service = AudioService(self.bus)
 
     @intent_file_handler('StreamRequest.intent')
     def handle_stream_intent(self, message):
