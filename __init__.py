@@ -24,11 +24,12 @@ import requests
 from xml.dom.minidom import parseString
 
 from adapt.intent import IntentBuilder
-from mycroft.skills.core import MycroftSkill, intent_handler, intent_file_handler
+from mycroft.skills.core import MycroftSkill, intent_file_handler
 from mycroft.util.log import LOG
 
 from mycroft.audio import wait_while_speaking
 from mycroft.messagebus.message import Message
+from mycroft.skills.audioservice import AudioService
 
 # Static values for tunein search requests
 base_url = "http://opml.radiotime.com/Search.ashx"
@@ -42,6 +43,7 @@ class TuneinSkill(MycroftSkill):
         self.audio_state = "stopped"  # 'playing', 'paused', 'stopped'
         self.station_name = None
         self.url = None
+        self.audioservice = AudioService(self.emitter)
 
     @intent_file_handler('StreamRequest.intent')
     def handle_stream_intent(self, message):
@@ -69,7 +71,7 @@ class TuneinSkill(MycroftSkill):
                         self.audio_state = "playing"
                         self.speak_dialog("now.playing", {"station": self.station_name} )
                         LOG.debug("Found stream URL: " + self.url)
-                        print ("TODO: Start Music here")
+                        self.audioservice.play(self.url)
                         return
 
         # We didn't find any playable stations
@@ -78,7 +80,7 @@ class TuneinSkill(MycroftSkill):
 
     def stop(self):
         if self.audio_state == "playing":
-            print ("TODO: Stop Music here")
+            self.audioservice.stop()
         self.audio_state = "stopped"
         self.station_name = None
         self.url = None
