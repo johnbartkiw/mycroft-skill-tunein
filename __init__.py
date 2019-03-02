@@ -54,7 +54,7 @@ class TuneinSkill(MycroftSkill):
     def find_station(self, search_term):
         payload = { "query" : search_term }
         # get the response from the TuneIn API
-        res = requests.post(url, data=payload, headers=headers)
+        res = requests.post(base_url, data=payload, headers=headers)
         # results are each in their own <outline> tag as defined by OPML (https://en.wikipedia.org/wiki/OPML)
         entries = dom.getElementsByTagName("outline")
 
