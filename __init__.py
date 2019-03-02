@@ -30,6 +30,7 @@ from mycroft.util.log import LOG
 from mycroft.audio import wait_while_speaking
 from mycroft.messagebus.message import Message
 from mycroft.skills.audioservice import AudioService
+from mycroft.util import play_mp3
 
 # Static values for tunein search requests
 base_url = "http://opml.radiotime.com/Search.ashx"
@@ -43,6 +44,7 @@ class TuneinSkill(MycroftSkill):
         self.audio_state = "stopped"  # 'playing', 'paused', 'stopped'
         self.station_name = None
         self.url = None
+        self.process = None
 
     def initialize(self):
         self.audio_service = AudioService(self.bus)
@@ -74,7 +76,8 @@ class TuneinSkill(MycroftSkill):
                         self.speak_dialog("now.playing", {"station": self.station_name} )
                         wait_while_speaking()
                         LOG.debug("Found stream URL: " + self.url)
-                        self.audio_service.play(self.url)
+                        #self.audio_service.play(self.url)
+                        self.process = play_mp3(random.choice(urls))
                         return
 
         # We didn't find any playable stations
@@ -84,7 +87,12 @@ class TuneinSkill(MycroftSkill):
 
     def stop(self):
         if self.audio_state == "playing":
-            self.audio_service.stop()
+            #self.audio_service.stop()
+            if self.process and self.process.poll() is None:
+               self.process.terminate()
+               self.process.wait()
+            LOG.debug("Stopping stream")
+        self.process = None
         self.audio_state = "stopped"
         self.station_name = None
         self.url = None
