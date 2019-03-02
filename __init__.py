@@ -72,12 +72,14 @@ class TuneinSkill(MycroftSkill):
                         self.station_name = entry.getAttribute("text")
                         self.audio_state = "playing"
                         self.speak_dialog("now.playing", {"station": self.station_name} )
+                        wait_while_speaking()
                         LOG.debug("Found stream URL: " + self.url)
                         self.audio_service.play(self.url)
                         return
 
         # We didn't find any playable stations
         self.speak_dialog("not.found")
+        wait_while_speaking()
         LOG.debug("Could not find a station with the query term: " + search_term)
 
     def stop(self):
