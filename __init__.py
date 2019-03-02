@@ -43,7 +43,9 @@ class TuneinSkill(MycroftSkill):
         self.audio_state = "stopped"  # 'playing', 'paused', 'stopped'
         self.station_name = None
         self.url = None
-        self.audioservice = AudioService(self.emitter)
+
+    def initialize(self):
+        self.audio_service = AudioService(self.emitter)
 
     @intent_file_handler('StreamRequest.intent')
     def handle_stream_intent(self, message):
