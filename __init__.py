@@ -93,8 +93,8 @@ class TuneinSkill(MycroftSkill):
     def stop(self):
         if self.audio_state == "playing":
             if self.process and self.process.poll() is None:
-               self.process.terminate()
-               self.process.wait()
+                self.process.terminate()
+                self.process.wait()
             LOG.debug("Stopping stream")
 
         self.process = None
