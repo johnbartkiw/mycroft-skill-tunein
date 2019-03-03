@@ -80,6 +80,7 @@ class TuneinSkill(MycroftSkill):
                         wait_while_speaking()
                         LOG.debug("Found stream URL: " + self.stream_url)
                         self.process = play_mp3(self.stream_url)
+                        return
 
         # We didn't find any playable stations
         self.speak_dialog("not.found")
