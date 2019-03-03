@@ -110,7 +110,6 @@ class TuneinSkill(MycroftSkill):
         self.process = None
         self.audio_state = "stopped"
         self.station_name = None
-        self.mpeg_url = None
         self.stream_url = None
         return True
 
