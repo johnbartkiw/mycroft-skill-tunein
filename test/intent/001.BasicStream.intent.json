@@ -1,0 +1,10 @@
+{
+"utterance": "Stream KEXP",
+"set_context": {"_TestRunner": "data", "test": ""},
+"intent_type": "handle_stream_intent",
+"intent": {
+"station": "KEXP"
+},
+"expected_dialog": "now.playing.dialog",
+"evaluation_timeout": 15
+}
