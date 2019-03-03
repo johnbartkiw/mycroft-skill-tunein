@@ -83,6 +83,7 @@ class TuneinSkill(MycroftSkill):
                         wait_while_speaking()
                         LOG.debug("Found stream URL: " + self.stream_url)
                         if (self.audio_service):
+                            time.sleep(4)
                             self.audio_service.play(self.stream_url)
                         else:
                             self.process = play_mp3(self.stream_url)
@@ -103,7 +104,7 @@ class TuneinSkill(MycroftSkill):
         if self.audio_state == "playing":
             if (self.audio_service):
                 self.audio_service.stop()
-                
+
             if self.process and self.process.poll() is None:
                self.process.terminate()
                self.process.wait()
