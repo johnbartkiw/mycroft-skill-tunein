@@ -74,6 +74,11 @@ class TuneinSkill(MycroftSkill):
                         self.mpeg_url = entry.getAttribute("URL")
                         self.station_name = entry.getAttribute("text")
                         # this URL will return audio/x-mpegurl data. This is just a list of URLs to the real streams
+
+                        # stop the current stream if we have one running
+                        if (self.audio_state == "playing"):
+                            self.stop()
+
                         self.stream_url = self.get_stream_url(self.mpeg_url)
                         self.audio_state = "playing"
                         self.speak_dialog("now.playing", {"station": self.station_name} )
