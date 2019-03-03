@@ -1,0 +1,23 @@
+# This file is auto translated by mycroft-msk.
+# Please do a manuel inspection of the translation
+
+# stream {station}
+stream {station}
+# stream {station} radio
+stream {station} radio
+# stream {station} internet radio
+stream {station} internetradio
+# stream {station} (on|with|using) tune in
+stream {station} (på | med | brug) tune-in
+# stream {station} radio (on|with|using) tune in
+stream {station} radio (på | med | brug) tune-in
+# stream {station} internet radio (on|with|using) tune in
+stream {station} internetradio (på | med | brug) tune-in
+# stream {station} radio station
+stream {station} radiostation
+# stream {station} internet radio station
+stream {station} internetradio station
+# stream {station} radio station (on|with|using) tune in
+stream {station} radiostation (på | med | brug) tune-in
+# stream {station} internet radio station (on|with|using) tune in
+stream {station} internetradio station (på | med | brug) tune-in
