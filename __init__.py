@@ -80,7 +80,9 @@ class TuneinSkill(MycroftSkill):
                         wait_while_speaking()
                         LOG.debug("Found stream URL: " + self.stream_url)
                         # Don't play the stream when we're running a test
-                        if !message.data.get('_TestRunner'):
+                        if message.data.get('_TestRunner'):
+                            print ("Initiated by test runner")
+                        else:
                             self.process = play_mp3(self.stream_url)
                         return
 
