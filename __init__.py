@@ -84,8 +84,9 @@ class TuneinSkill(MycroftSkill):
                         wait_while_speaking()
                         LOG.debug("Found stream URL: " + self.stream_url)
                         if (self.audio_service):
-                            time.sleep(4)
-                            self.audio_service.play(self.stream_url.encode('utf-8'))
+                            time.sleep(2)
+                            stream_url_encoded = self.stream_url.encode('utf-8')
+                            self.audio_service.play(stream_url_encoded)
                         else:
                             self.process = play_mp3(self.stream_url)
                         return
