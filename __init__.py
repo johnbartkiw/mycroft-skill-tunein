@@ -82,7 +82,7 @@ class TuneinSkill(MycroftSkill):
                         self.audio_state = "playing"
                         self.speak_dialog("now.playing", {"station": self.station_name} )
                         wait_while_speaking()
-                        LOG.debug("Found stream URL: " + self.stream_url.encode('utf-8'))
+                        LOG.debug("Found stream URL: " + self.stream_url)
                         if (self.audio_service):
                             time.sleep(4)
                             self.audio_service.play(self.stream_url.encode('utf-8'))
