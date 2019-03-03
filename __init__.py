@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import requests
+import time
 from xml.dom.minidom import parseString
 
 from adapt.intent import IntentBuilder
