@@ -49,15 +49,12 @@ class TuneinSkill(MycroftSkill):
 
     @intent_file_handler('StreamRequest.intent')
     def handle_stream_intent(self, message):
-        if message.data.get('_TestRunner'):
-            self.find_station(message.data["station"],True)
-        else:
-            self.find_station(message.data["station"],False)
+        self.find_station(message.data["station"])
         LOG.debug("Station data: " + message.data["station"])
 
 
     # Attempt to find the first active station matching the query string
-    def find_station(self, search_term, test_run):
+    def find_station(self, search_term):
         payload = { "query" : search_term }
         # get the response from the TuneIn API
         res = requests.post(base_url, data=payload, headers=headers)
@@ -82,8 +79,7 @@ class TuneinSkill(MycroftSkill):
                         self.speak_dialog("now.playing", {"station": self.station_name} )
                         wait_while_speaking()
                         LOG.debug("Found stream URL: " + self.stream_url)
-                        if (test_run == False):
-                            self.process = play_mp3(self.stream_url)
+                        self.process = play_mp3(self.stream_url)
                         return
 
         # We didn't find any playable stations

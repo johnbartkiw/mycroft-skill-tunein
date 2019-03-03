@@ -1,6 +1,5 @@
 {
 "utterance": "Stream asdfadsfasdfasdfasdfasdfadsf",
-"set_context": {"_TestRunner": "data", "test": ""},
 "intent_type": "StreamRequest.intent",
 "expected_dialog": "not.found",
 "evaluation_timeout": 15
