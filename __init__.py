@@ -43,7 +43,8 @@ class TuneinSkill(MycroftSkill):
 
         self.audio_state = "stopped"  # 'playing', 'paused', 'stopped'
         self.station_name = None
-        self.url = None
+        self.stream_url = None
+        self.mpeg_url = None
         self.process = None
 
     def initialize(self):
@@ -70,13 +71,15 @@ class TuneinSkill(MycroftSkill):
             if (entry.getAttribute("type") == "audio") and (entry.getAttribute("item") == "station"):
                     if (entry.getAttribute("key") != "unavailable"):
                         # Ignore entries that are marked as unavailable
-                        self.url = entry.getAttribute("URL")
+                        self.mpeg_url = entry.getAttribute("URL")
                         self.station_name = entry.getAttribute("text")
+                        # this URL will return audio/x-mpegurl data. This is just a list of URLs to the real streams
+                        self.stream_url = self.get_stream_url(self.mpegurl)
                         self.audio_state = "playing"
                         self.speak_dialog("now.playing", {"station": self.station_name} )
                         wait_while_speaking()
-                        LOG.debug("Found stream URL: " + self.url)
-                        self.audio_service.play("http://listen.radionomy.com/theendcanada")
+                        LOG.debug("Found stream URL: " + self.stream_url)
+                        self.audio_service.play(self.stream_url)
                         #self.process = play_mp3("http://listen.radionomy.com/theendcanada")
                         return
 
@@ -84,6 +87,12 @@ class TuneinSkill(MycroftSkill):
         self.speak_dialog("not.found")
         wait_while_speaking()
         LOG.debug("Could not find a station with the query term: " + search_term)
+
+    def get_stream_url(self, mpegurl):
+        res = requests.get(mpegurl)
+        #Get the first line from the results
+        for line in res.text.splitlines():
+            return line
 
     def stop(self):
         if self.audio_state == "playing":
