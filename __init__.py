@@ -79,8 +79,8 @@ class TuneinSkill(MycroftSkill):
                         self.speak_dialog("now.playing", {"station": self.station_name} )
                         wait_while_speaking()
                         LOG.debug("Found stream URL: " + self.stream_url)
-                        self.audio_service.play(self.stream_url)
-                        #self.process = play_mp3("http://listen.radionomy.com/theendcanada")
+                        #self.audio_service.play(self.stream_url)
+                        self.process = play_mp3("http://listen.radionomy.com/theendcanada")
                         return
 
         # We didn't find any playable stations
@@ -96,7 +96,7 @@ class TuneinSkill(MycroftSkill):
 
     def stop(self):
         if self.audio_state == "playing":
-            self.audio_service.stop()
+            #self.audio_service.stop()
             if self.process and self.process.poll() is None:
                self.process.terminate()
                self.process.wait()
