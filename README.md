@@ -1,5 +1,6 @@
 # <img src='tunein.png' width='50' style='vertical-align:bottom'/> TuneIn
-Search and stream from TuneIn
+Search and stream live sports, music, news, podcasts, and internet radio from around the world
+using TuneIn
 
 ## Description
 Make internet radio streaming work with non-hard coded stations getting streams from TuneIn.
