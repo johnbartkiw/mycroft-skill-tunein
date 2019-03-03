@@ -30,7 +30,6 @@ from mycroft.util.log import LOG
 
 from mycroft.audio import wait_while_speaking
 from mycroft.messagebus.message import Message
-from mycroft.skills.audioservice import AudioService
 from mycroft.util import play_mp3
 
 # Static values for tunein search requests
@@ -47,9 +46,6 @@ class TuneinSkill(MycroftSkill):
         self.stream_url = None
         self.mpeg_url = None
         self.process = None
-
-    def initialize(self):
-        self.audio_service = AudioService(self.bus)
 
     @intent_file_handler('StreamRequest.intent')
     def handle_stream_intent(self, message):
@@ -83,11 +79,7 @@ class TuneinSkill(MycroftSkill):
                         self.speak_dialog("now.playing", {"station": self.station_name} )
                         wait_while_speaking()
                         LOG.debug("Found stream URL: " + self.stream_url)
-                        if (self.audio_service):
-                            self.audio_service.play("http://live-mp3-128.kexp.org/kexp128.mp3")
-                        else:
-                            self.process = play_mp3(self.stream_url)
-                        return
+                        self.process = play_mp3(self.stream_url)
 
         # We didn't find any playable stations
         self.speak_dialog("not.found")
@@ -102,9 +94,6 @@ class TuneinSkill(MycroftSkill):
 
     def stop(self):
         if self.audio_state == "playing":
-            if (self.audio_service):
-                self.audio_service.stop()
-
             if self.process and self.process.poll() is None:
                self.process.terminate()
                self.process.wait()
