@@ -1,7 +1,6 @@
 {
 "utterance": "Stream KEXP",
-"set_context": {"_TestRunner": "data", "test": ""},
-"intent_type": "handle_stream_intent",
+"intent_type": "StreamRequest.intent",
 "intent": {
 "station": "KEXP"
 },

@@ -49,10 +49,7 @@ class TuneinSkill(MycroftSkill):
 
     @intent_file_handler('StreamRequest.intent')
     def handle_stream_intent(self, message):
-        if message.data.get('_TestRunner'):
-            self.find_station(message.data["station"], True)
-        else:
-            self.find_station(message.data["station"], False)
+        self.find_station(message.data["station"])
         LOG.debug("Station data: " + message.data["station"])
 
 
@@ -82,9 +79,7 @@ class TuneinSkill(MycroftSkill):
                         self.speak_dialog("now.playing", {"station": self.station_name} )
                         wait_while_speaking()
                         LOG.debug("Found stream URL: " + self.stream_url)
-                        # Don't play the stream when we're running a test
-                        if (test_run == False):
-                            self.process = play_mp3(self.stream_url)
+                        self.process = play_mp3(self.stream_url)
                         return
 
         # We didn't find any playable stations
