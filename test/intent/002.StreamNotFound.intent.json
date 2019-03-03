@@ -1,10 +1,7 @@
 {
-"utterance": "Stream KEXP",
+"utterance": "Stream asdfadsfasdfasdfasdfasdfadsf",
 "set_context": {"_TestRunner": "data", "test": ""},
 "intent_type": "StreamRequest.intent",
-"intent": {
-"station": "KEXP"
-},
-"expected_dialog": "now.playing",
+"expected_dialog": "not.found",
 "evaluation_timeout": 15
 }

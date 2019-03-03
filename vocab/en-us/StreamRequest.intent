@@ -8,3 +8,13 @@ stream {station} radio station
 stream {station} internet radio station
 stream {station} radio station (on|with|using) tune in
 stream {station} internet radio station (on|with|using) tune in
+stream {station} {_TestRunner}
+stream {station} radio {_TestRunner}
+stream {station} internet radio {_TestRunner}
+stream {station} (on|with|using) tune in {_TestRunner}
+stream {station} radio (on|with|using) tune in {_TestRunner}
+stream {station} internet radio (on|with|using) tune in {_TestRunner}
+stream {station} radio station {_TestRunner}
+stream {station} internet radio station {_TestRunner}
+stream {station} radio station (on|with|using) tune in {_TestRunner}
+stream {station} internet radio station (on|with|using) tune in {_TestRunner}
