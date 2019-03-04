@@ -21,20 +21,18 @@
 # SOFTWARE.
 
 import requests
-import time
 from xml.dom.minidom import parseString
 
-from adapt.intent import IntentBuilder
 from mycroft.skills.core import MycroftSkill, intent_file_handler
 from mycroft.util.log import LOG
 
 from mycroft.audio import wait_while_speaking
-from mycroft.messagebus.message import Message
 from mycroft.util import play_mp3
 
 # Static values for tunein search requests
 base_url = "http://opml.radiotime.com/Search.ashx"
 headers = {}
+
 
 class TuneinSkill(MycroftSkill):
 
@@ -52,7 +50,6 @@ class TuneinSkill(MycroftSkill):
         self.find_station(message.data["station"])
         LOG.debug("Station data: " + message.data["station"])
 
-
     # Attempt to find the first active station matching the query string
     def find_station(self, search_term):
         payload = { "query" : search_term }
@@ -66,21 +63,21 @@ class TuneinSkill(MycroftSkill):
         for entry in entries:
             # Only look at outlines that are of type=audio and item=station
             if (entry.getAttribute("type") == "audio") and (entry.getAttribute("item") == "station"):
-                    if (entry.getAttribute("key") != "unavailable"):
-                        # stop the current stream if we have one running
-                        if (self.audio_state == "playing"):
-                            self.stop()
-                        # Ignore entries that are marked as unavailable
-                        self.mpeg_url = entry.getAttribute("URL")
-                        self.station_name = entry.getAttribute("text")
-                        # this URL will return audio/x-mpegurl data. This is just a list of URLs to the real streams
-                        self.stream_url = self.get_stream_url(self.mpeg_url)
-                        self.audio_state = "playing"
-                        self.speak_dialog("now.playing", {"station": self.station_name} )
-                        wait_while_speaking()
-                        LOG.debug("Found stream URL: " + self.stream_url)
-                        self.process = play_mp3(self.stream_url)
-                        return
+                if (entry.getAttribute("key") != "unavailable"):
+                    # stop the current stream if we have one running
+                    if (self.audio_state == "playing"):
+                        self.stop()
+                    # Ignore entries that are marked as unavailable
+                    self.mpeg_url = entry.getAttribute("URL")
+                    self.station_name = entry.getAttribute("text")
+                    # this URL will return audio/x-mpegurl data. This is just a list of URLs to the real streams
+                    self.stream_url = self.get_stream_url(self.mpeg_url)
+                    self.audio_state = "playing"
+                    self.speak_dialog("now.playing", {"station": self.station_name} )
+                    wait_while_speaking()
+                    LOG.debug("Found stream URL: " + self.stream_url)
+                    self.process = play_mp3(self.stream_url)
+                    return
 
         # We didn't find any playable stations
         self.speak_dialog("not.found")
@@ -89,15 +86,15 @@ class TuneinSkill(MycroftSkill):
 
     def get_stream_url(self, mpegurl):
         res = requests.get(mpegurl)
-        #Get the first line from the results
+        # Get the first line from the results
         for line in res.text.splitlines():
             return line
 
     def stop(self):
         if self.audio_state == "playing":
             if self.process and self.process.poll() is None:
-               self.process.terminate()
-               self.process.wait()
+                self.process.terminate()
+                self.process.wait()
             LOG.debug("Stopping stream")
 
         self.process = None
@@ -106,6 +103,7 @@ class TuneinSkill(MycroftSkill):
         self.stream_url = None
         self.mpeg_url = None
         return True
+
 
 def create_skill():
     return TuneinSkill()

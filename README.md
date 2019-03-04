@@ -1,9 +1,15 @@
-
-## mycroft-skill-tunein
-Search Tune In for Internet radio streaming stations
+# <img src='tunein.png' width='50' style='vertical-align:bottom'/> TuneIn
+Search and stream live sports, music, news, podcasts, and internet radio from around the world
+using TuneIn
 
 ## Description
-Make internet radio streaming work with non-hard coded stations
+Make internet radio streaming work with non-hard coded stations getting streams from TuneIn.
+
+TuneIn brings you live sports, music, news, podcasts, and internet radio from around the world.
+Listen to the audio you love on Mycroft device and let the moments move you.
+
+https://tunein.com/
+
 
 ## Examples
 * "Stream KEXP"
@@ -19,3 +25,14 @@ Make internet radio streaming work with non-hard coded stations
 
 ## Credits
 John Bartkiw
+
+## Category
+**Entertainment**
+
+## Tags
+#stream
+#streaming
+#radio
+#TuneIn
+#Tune in
+
