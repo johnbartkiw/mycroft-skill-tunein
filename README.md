@@ -10,8 +10,14 @@ Listen to the audio you love on Mycroft device and let the moments move you.
 
 https://tunein.com/
 
-
 ## Examples
+* "Play KEXP (on|with|using) tune in "
+* "Play Jack FM radio"
+* "Play Jazz 24 internet radio"
+* "Play 80s Metal radio (on|with|using) tune in"
+* "Play 70s Country internet radio (on|with|using) tune in"
+
+## Examples (Old Intent. May be deprecated after full testing of common play framework)
 * "Stream KEXP"
 * "Stream Jack FM Radio"
 * "Stream Jazz 24 internet radio"
