@@ -20,10 +20,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import re
 import requests
 from xml.dom.minidom import parseString
 
-from mycroft.skills.core import MycroftSkill, intent_file_handler
+from mycroft.skills.common_play_skill import CommonPlaySkill, CPSMatchLevel
+from mycroft.skills.core import intent_file_handler
 from mycroft.util.log import LOG
 
 from mycroft.audio import wait_while_speaking
@@ -34,16 +36,60 @@ base_url = "http://opml.radiotime.com/Search.ashx"
 headers = {}
 
 
-class TuneinSkill(MycroftSkill):
+class TuneinSkill(CommonPlaySkill):
 
     def __init__(self):
-        super(TuneinSkill, self).__init__(name="TuneinSkill")
+        super().__init__(name="TuneinSkill")
 
         self.audio_state = "stopped"  # 'playing', 'paused', 'stopped'
         self.station_name = None
         self.stream_url = None
         self.mpeg_url = None
         self.process = None
+        self.regexes = {}
+
+    def CPS_match_query_phrase(self, phrase):
+        # Look for regex matches starting from the most specific to the least
+        # Play <data> internet radio on tune in
+        match = re.search(self.translate_regex('internet_radio_on_tunein'), phrase)
+        if match:
+            data = re.sub(self.translate_regex('internet_radio_on_tunein'), '', phrase)
+            LOG.debug("CPS Match (internet_radio_on_tunein): " + data)
+            return phrase, CPSMatchLevel.EXACT, data
+
+        # Play <data> radio on tune in
+        match = re.search(self.translate_regex('radio_on_tunein'), phrase)
+        if match:
+            data = re.sub(self.translate_regex('radio_on_tunein'), '', phrase)
+            LOG.debug("CPS Match (radio_on_tunein): " + data)
+            return phrase, CPSMatchLevel.EXACT, data
+
+        # Play <data> on tune in
+        match = re.search(self.translate_regex('on_tunein'), phrase)
+        if match:
+            data = re.sub(self.translate_regex('on_tunein'), '', phrase)
+            LOG.debug("CPS Match (on_tunein): " + data)
+            return phrase, CPSMatchLevel.EXACT, data
+
+        # Play <data> internet radio
+        match = re.search(self.translate_regex('internet_radio'), phrase)
+        if match:
+            data = re.sub(self.translate_regex('internet_radio'), '', phrase)
+            LOG.debug("CPS Match (internet_radio): " + data)
+            return phrase, CPSMatchLevel.CATEGORY, data
+
+        # Play <data> radio
+        match = re.search(self.translate_regex('radio'), phrase)
+        if match:
+            data = re.sub(self.translate_regex('radio'), '', phrase)
+            LOG.debug("CPS Match (radio): " + data)
+            return phrase, CPSMatchLevel.CATEGORY, data
+
+        return phrase, CPSMatchLevel.GENERIC, phrase
+
+    def CPS_start(self, phrase, data):
+        LOG.debug("CPS Start: " + data)
+        self.find_station(data)
 
     @intent_file_handler('StreamRequest.intent')
     def handle_stream_intent(self, message):
@@ -76,11 +122,7 @@ class TuneinSkill(MycroftSkill):
                     self.speak_dialog("now.playing", {"station": self.station_name} )
                     wait_while_speaking()
                     LOG.debug("Found stream URL: " + self.stream_url)
-                    # Hack to fix that some stations dosnt play...
-                    if self.stream_url[-3:] == 'm3u':
-                        self.process = play_mp3(self.stream_url[:-4])
-                    else:
-                        self.process = play_mp3(self.stream_url)
+                    self.process = play_mp3(self.validate_url(self.stream_url))
                     return
 
         # We didn't find any playable stations
@@ -108,6 +150,24 @@ class TuneinSkill(MycroftSkill):
         self.mpeg_url = None
         return True
 
+    # Safely strip any bad m3u extension on url. For now this is the only known bad extension
+    def validate_url(self, url):
+        if (len(url) > 4):
+            if self.stream_url[-3:] == 'm3u':
+                return url[:-4]
+            else:
+                return url
+        return url
+
+    # Get the correct localized regex
+    def translate_regex(self, regex):
+        if regex not in self.regexes:
+            path = self.find_resource(regex + '.regex')
+            if path:
+                with open(path) as f:
+                    string = f.read().strip()
+                self.regexes[regex] = string
+        return self.regexes[regex]
 
 def create_skill():
     return TuneinSkill()
