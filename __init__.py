@@ -41,7 +41,7 @@ class TuneinSkill(CommonPlaySkill):
     def __init__(self):
         super().__init__(name="TuneinSkill")
 
-        self.audio_state = "stopped"  # 'playing', 'paused', 'stopped'
+        self.audio_state = "stopped"  # 'playing', 'stopped'
         self.station_name = None
         self.stream_url = None
         self.mpeg_url = None
