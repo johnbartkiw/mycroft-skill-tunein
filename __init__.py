@@ -122,7 +122,7 @@ class TuneinSkill(CommonPlaySkill):
                     self.speak_dialog("now.playing", {"station": self.station_name} )
                     wait_while_speaking()
                     LOG.debug("Found stream URL: " + self.stream_url)
-                    self.process = play_mp3(self.validate_url(self.stream_url))
+                    self.process = play_mp3(self.stream_url)
                     return
 
         # We didn't find any playable stations
@@ -134,7 +134,7 @@ class TuneinSkill(CommonPlaySkill):
         res = requests.get(mpegurl)
         # Get the first line from the results
         for line in res.text.splitlines():
-            return line
+            return self.process_url(line)
 
     def stop(self):
         if self.audio_state == "playing":
@@ -150,14 +150,24 @@ class TuneinSkill(CommonPlaySkill):
         self.mpeg_url = None
         return True
 
-    # Safely strip any bad m3u extension on url. For now this is the only known bad extension
-    def validate_url(self, url):
+    # Check what kind of url was pulled from the x-mpegurl data
+    def process_url(self, url):
         if (len(url) > 4):
-            if self.stream_url[-3:] == 'm3u':
+            if url[-3:] == 'm3u':
                 return url[:-4]
+            if url[-3:] == 'pls':
+                return self.process_pls(url)
             else:
                 return url
         return url
+
+    # Pull down the pls data and pull out the real stream url out of it
+    def process_pls(self, url):
+        res = requests.get(url)
+        # Loop through the data looking for the first url
+        for line in res.text.splitlines():
+            if line.startswith("File1="):
+                return line[6:]
 
     # Get the correct localized regex
     def translate_regex(self, regex):
