@@ -88,7 +88,7 @@ class TuneinSkill(CommonPlaySkill):
 
     def CPS_start(self, phrase, data):
         LOG.debug("CPS Start: " + data)
-        self.find_station(data)
+        self.find_station(data, data["utterance"])
 
     @intent_file_handler('StreamRequest.intent')
     def handle_stream_intent(self, message):
