@@ -25,6 +25,7 @@ import requests
 from xml.dom.minidom import parseString
 
 from mycroft.skills.common_play_skill import CommonPlaySkill, CPSMatchLevel
+from mycroft.skills.audioservice import AudioService
 from mycroft.skills.core import intent_file_handler
 from mycroft.util.log import LOG
 
@@ -40,8 +41,7 @@ class TuneinSkill(CommonPlaySkill):
 
     def __init__(self):
         super().__init__(name="TuneinSkill")
-
-        self.audio_state = "stopped"  # 'playing', 'stopped'
+        self.audio_service = AudioService(self.emitter)
         self.station_name = None
         self.stream_url = None
         self.mpeg_url = None
@@ -93,11 +93,11 @@ class TuneinSkill(CommonPlaySkill):
 
     @intent_file_handler('StreamRequest.intent')
     def handle_stream_intent(self, message):
-        self.find_station(message.data["station"])
+        self.find_station(message.data["station"], message.data["utterance"])
         LOG.debug("Station data: " + message.data["station"])
 
     # Attempt to find the first active station matching the query string
-    def find_station(self, search_term):
+    def find_station(self, search_term, utterance):
         payload = { "query" : search_term }
         # get the response from the TuneIn API
         res = requests.post(base_url, data=payload, headers=headers)
@@ -110,9 +110,6 @@ class TuneinSkill(CommonPlaySkill):
             # Only look at outlines that are of type=audio and item=station
             if (entry.getAttribute("type") == "audio") and (entry.getAttribute("item") == "station"):
                 if (entry.getAttribute("key") != "unavailable"):
-                    # stop the current stream if we have one running
-                    if (self.audio_state == "playing"):
-                        self.stop()
                     # Ignore entries that are marked as unavailable
                     self.mpeg_url = entry.getAttribute("URL")
                     self.station_name = entry.getAttribute("text")
@@ -122,7 +119,7 @@ class TuneinSkill(CommonPlaySkill):
                     self.speak_dialog("now.playing", {"station": self.station_name} )
                     wait_while_speaking()
                     LOG.debug("Found stream URL: " + self.stream_url)
-                    self.process = play_mp3(self.stream_url)
+                    self.audio_service.play(self.stream_url, utterance)
                     return
 
         # We didn't find any playable stations
@@ -135,20 +132,6 @@ class TuneinSkill(CommonPlaySkill):
         # Get the first line from the results
         for line in res.text.splitlines():
             return self.process_url(line)
-
-    def stop(self):
-        if self.audio_state == "playing":
-            if self.process and self.process.poll() is None:
-                self.process.terminate()
-                self.process.wait()
-            LOG.debug("Stopping stream")
-
-        self.process = None
-        self.audio_state = "stopped"
-        self.station_name = None
-        self.stream_url = None
-        self.mpeg_url = None
-        return True
 
     # Check what kind of url was pulled from the x-mpegurl data
     def process_url(self, url):
