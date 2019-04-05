@@ -41,7 +41,6 @@ class TuneinSkill(CommonPlaySkill):
 
     def __init__(self):
         super().__init__(name="TuneinSkill")
-        self.audio_service = AudioService(self.emitter)
         self.station_name = None
         self.stream_url = None
         self.mpeg_url = None
@@ -115,10 +114,9 @@ class TuneinSkill(CommonPlaySkill):
                     self.station_name = entry.getAttribute("text")
                     # this URL will return audio/x-mpegurl data. This is just a list of URLs to the real streams
                     self.stream_url = self.get_stream_url(self.mpeg_url)
-                    self.audio_state = "playing"
-                    self.speak_dialog("now.playing", {"station": self.station_name} )
-                    wait_while_speaking()
                     LOG.debug("Found stream URL: " + self.stream_url)
+                    self.audio_service = AudioService(self.bus)
+                    self.speak_dialog("now.playing", {"station": self.station_name} )
                     self.audio_service.play(self.stream_url, utterance)
                     return
 
