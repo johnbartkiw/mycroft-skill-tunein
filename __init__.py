@@ -47,6 +47,9 @@ class TuneinSkill(CommonPlaySkill):
         self.process = None
         self.regexes = {}
 
+    def initialize(self):
+        pass
+
     def CPS_match_query_phrase(self, phrase):
         # Look for regex matches starting from the most specific to the least
         # Play <data> internet radio on tune in
@@ -86,9 +89,12 @@ class TuneinSkill(CommonPlaySkill):
 
         return phrase, CPSMatchLevel.GENERIC, phrase
 
+    def stop(self):
+        pass
+
     def CPS_start(self, phrase, data):
         LOG.debug("CPS Start: " + data)
-        self.find_station(data, data["utterance"])
+        self.find_station(data)
 
     @intent_file_handler('StreamRequest.intent')
     def handle_stream_intent(self, message):
@@ -96,7 +102,7 @@ class TuneinSkill(CommonPlaySkill):
         LOG.debug("Station data: " + message.data["station"])
 
     # Attempt to find the first active station matching the query string
-    def find_station(self, search_term, utterance):
+    def find_station(self, search_term, utterance = None):
         payload = { "query" : search_term }
         # get the response from the TuneIn API
         res = requests.post(base_url, data=payload, headers=headers)
