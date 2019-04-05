@@ -123,6 +123,7 @@ class TuneinSkill(CommonPlaySkill):
                     LOG.debug("Found stream URL: " + self.stream_url)
                     self.audio_service = AudioService(self.bus)
                     self.speak_dialog("now.playing", {"station": self.station_name} )
+                    wait_while_speaking()
                     self.audio_service.play(self.stream_url, utterance)
                     return
 
