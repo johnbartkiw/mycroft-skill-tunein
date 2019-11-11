@@ -24,6 +24,11 @@ import re
 import requests
 from xml.dom.minidom import parseString
 
+import yaml
+import os.path
+from os import path
+from os.path import expanduser
+
 from mycroft.skills.common_play_skill import CommonPlaySkill, CPSMatchLevel
 from mycroft.skills.core import intent_file_handler
 from mycroft.util.log import LOG
@@ -96,8 +101,24 @@ class TuneinSkill(CommonPlaySkill):
         self.find_station(message.data["station"])
         LOG.debug("Station data: " + message.data["station"])
 
+    def apply_aliases(self, search_term):
+        # Allow search terms to be expanded or aliased
+        home = expanduser('~')
+        alias_file = home + '/tunein_aliases.yaml'
+        if path.exists(alias_file):
+            with open(alias_file, 'r') as file:
+                alias_list = yaml.load(file)
+            if search_term in alias_list:
+                search_term = alias_list[search_term]
+        return search_term
+
     # Attempt to find the first active station matching the query string
     def find_station(self, search_term):
+
+        LOG.debug("pre-alias search_term: " + search_term);
+        search_term = self.apply_aliases(search_term)
+        LOG.debug("aliased search_term: " + search_term);
+
         payload = { "query" : search_term }
         # get the response from the TuneIn API
         res = requests.post(base_url, data=payload, headers=headers)
