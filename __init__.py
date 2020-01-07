@@ -29,12 +29,13 @@ import os.path
 from os import path
 from os.path import expanduser
 
+from mycroft.audio.services.vlc import VlcService
+
 from mycroft.skills.common_play_skill import CommonPlaySkill, CPSMatchLevel
 from mycroft.skills.core import intent_file_handler
 from mycroft.util.log import LOG
 
 from mycroft.audio import wait_while_speaking
-from mycroft.util import play_mp3
 
 # Static values for tunein search requests
 base_url = "http://opml.radiotime.com/Search.ashx"
@@ -46,11 +47,11 @@ class TuneinSkill(CommonPlaySkill):
     def __init__(self):
         super().__init__(name="TuneinSkill")
 
+        self.mediaplayer = VlcService(config={'low_volume': 10, 'duck': True})
         self.audio_state = "stopped"  # 'playing', 'stopped'
         self.station_name = None
         self.stream_url = None
         self.mpeg_url = None
-        self.process = None
         self.regexes = {}
 
     def CPS_match_query_phrase(self, phrase):
@@ -115,6 +116,7 @@ class TuneinSkill(CommonPlaySkill):
     # Attempt to find the first active station matching the query string
     def find_station(self, search_term):
 
+        tracklist = []
         LOG.debug("pre-alias search_term: " + search_term);
         search_term = self.apply_aliases(search_term)
         LOG.debug("aliased search_term: " + search_term);
@@ -143,7 +145,9 @@ class TuneinSkill(CommonPlaySkill):
                     self.speak_dialog("now.playing", {"station": self.station_name} )
                     wait_while_speaking()
                     LOG.debug("Found stream URL: " + self.stream_url)
-                    self.process = play_mp3(self.stream_url)
+                    tracklist.append(self.stream_url)
+                    self.mediaplayer.add_list(tracklist)
+                    self.mediaplayer.play()
                     return
 
         # We didn't find any playable stations
@@ -159,17 +163,20 @@ class TuneinSkill(CommonPlaySkill):
 
     def stop(self):
         if self.audio_state == "playing":
-            if self.process and self.process.poll() is None:
-                self.process.terminate()
-                self.process.wait()
+            self.mediaplayer.stop()
+            self.mediaplayer.clear_list()
             LOG.debug("Stopping stream")
 
-        self.process = None
         self.audio_state = "stopped"
         self.station_name = None
         self.stream_url = None
         self.mpeg_url = None
         return True
+
+    def shutdown(self):
+        if self.audio_state == 'playing':
+            self.mediaplayer.stop()
+            self.mediaplayer.clear_list()
 
     # Check what kind of url was pulled from the x-mpegurl data
     def process_url(self, url):
