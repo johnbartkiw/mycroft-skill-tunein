@@ -1,0 +1,72 @@
+skillMetadata:
+   sections:
+      - name: Aliases
+        fields:
+          - name: alias_intro
+            type: label
+            label: >
+              <p>
+              Sometimes it's hard to get the speech-to-text service to recognize stations
+              with for ex. abbreviations or unusual names<br><br>
+              To tackle that you can <b>create up to 5 aliases</b>. The <b>first box is the original station name</b> 
+              - or parts of it -, <b>second the alias to use when asking to play a station.</b><br>
+              <i>ie. Original name: 'Radio HJDSA Southeast' => station: HJDSA, alias: Sunshine<br>
+              Utterance: Play Radio Sunshine Southeast</i><br><br> 
+              Go to <a href="https://tunein.com">TuneIn</a> if you want to check the station exists under that name 
+              </p>
+          - name: station0
+            type: text
+            label: station
+            value: ""
+          - name: alias0
+            type: text
+            label: alias
+            value: ""
+          - name: sep0
+            type: label
+            label: >
+              <hr>
+          - name: station1
+            type: text
+            label: station
+            value: ""
+          - name: alias1
+            type: text
+            label: alias
+            value: ""
+          - name: sep1
+            type: label
+            label: >
+              <hr>
+          - name: station2
+            type: text
+            label: station
+            value: ""
+          - name: alias2
+            type: text
+            label: alias
+            value: ""
+          - name: sep2
+            type: label
+            label: >
+              <hr>
+          - name: station3
+            type: text
+            label: station
+            value: ""
+          - name: alias3
+            type: text
+            label: alias
+            value: ""
+          - name: sep3
+            type: label
+            label: >
+              <hr>
+          - name: station4
+            type: text
+            label: station
+            value: ""
+          - name: alias4
+            type: text
+            label: alias
+            value: ""
