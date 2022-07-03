@@ -1,0 +1,6 @@
+dependencies:
+  system:
+    all: vlc
+  python:
+    - requests
+    - python-vlc
