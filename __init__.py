@@ -34,12 +34,65 @@ from mycroft.audio.services.vlc import VlcService
 from mycroft.skills.common_play_skill import CommonPlaySkill, CPSMatchLevel
 from mycroft.skills.core import intent_file_handler
 from mycroft.util.log import LOG
-
 from mycroft.audio import wait_while_speaking
+from lingua_franca.parse import match_one
 
 # Static values for tunein search requests
 base_url = "http://opml.radiotime.com/Search.ashx"
 headers = {}
+
+
+def request_api(search_term):
+    """ Requests the TuneIn API for stations that match the search_term
+    If the uttered station is not found it tries to redo (retries:1) the request with
+    a suggested station name - if one is given
+
+    Args:
+        search_term: The requested station name
+
+    Returns:
+        dom: The DOM containing relevant stations
+    """
+    tries = 2
+
+    while tries and search_term:
+        payload = {"query": search_term}
+        # get the response from the TuneIn API
+        res = requests.post(base_url, data=payload, headers=headers)
+        dom = parseString(res.text)
+        # Only look at outlines that are of type=audio and item=station (.. and available)
+        for entry in reversed(dom.getElementsByTagName("outline")):
+            if entry.getAttribute("key") == "unavailable" or (entry.getAttribute("type") != "audio") or (
+                    entry.getAttribute("item") != "station"):
+                parent = entry.parentNode
+                parent.removeChild(entry)
+
+        if dom.getElementsByTagName("outline").length != 0:
+            break
+        # if the input term isnt exact (eg. "Deutschlandfunk Nowa") - and not complete gibberish - the api returns
+        # <body>
+        # <outline text="Did you mean?">
+        # <outline type="link" text="Deutschlandfunk Nova" URL="http://opml.radiotime.com/Search.ashx?event=d..."/>
+        _dom = parseString(res.text)
+        for entry in _dom.getElementsByTagName("outline"):
+            if entry.getAttribute("type") == "link":
+                search_term = entry.getAttribute("text")
+                break
+        else:
+            search_term = ""
+        tries -= 1
+
+    return dom
+
+
+def _fuzzy_match(query, entries):
+    stations = [entry.getAttribute("text") for entry in entries]
+    if len(stations):
+        _match, perc = match_one(query, stations)
+        for entry in entries:
+            if _match == entry.getAttribute("text"):
+                return entry, perc
+    return None, None
 
 
 class TuneinSkill(CommonPlaySkill):
@@ -117,43 +170,40 @@ class TuneinSkill(CommonPlaySkill):
     def find_station(self, search_term):
 
         tracklist = []
-        LOG.debug("pre-alias search_term: " + search_term);
+        retry = True
+        LOG.debug("pre-alias search_term: " + search_term)
         search_term = self.apply_aliases(search_term)
-        LOG.debug("aliased search_term: " + search_term);
+        LOG.debug("aliased search_term: " + search_term)
 
-        payload = { "query" : search_term }
-        # get the response from the TuneIn API
-        res = requests.post(base_url, data=payload, headers=headers)
-        dom = parseString(res.text)
+        dom = request_api(search_term)
         # results are each in their own <outline> tag as defined by OPML (https://en.wikipedia.org/wiki/OPML)
-        entries = dom.getElementsByTagName("outline")
+        # fuzzy matches the query to the given stations NodeList
+        match, perc = _fuzzy_match(search_term, dom.getElementsByTagName("outline"))
 
-        # Loop through outlines in the lists
-        for entry in entries:
-            # Only look at outlines that are of type=audio and item=station
-            if (entry.getAttribute("type") == "audio") and (entry.getAttribute("item") == "station"):
-                if (entry.getAttribute("key") != "unavailable"):
-                    # stop the current stream if we have one running
-                    if (self.audio_state == "playing"):
-                        self.stop()
-                    # Ignore entries that are marked as unavailable
-                    self.mpeg_url = entry.getAttribute("URL")
-                    self.station_name = entry.getAttribute("text")
-                    # this URL will return audio/x-mpegurl data. This is just a list of URLs to the real streams
-                    self.stream_url = self.get_stream_url(self.mpeg_url)
-                    self.audio_state = "playing"
-                    self.speak_dialog("now.playing", {"station": self.station_name} )
-                    wait_while_speaking()
-                    LOG.debug("Found stream URL: " + self.stream_url)
-                    tracklist.append(self.stream_url)
-                    self.mediaplayer.add_list(tracklist)
-                    self.mediaplayer.play()
-                    return
+        # No matching stations
+        if match is None:
+            self.speak_dialog("not.found")
+            wait_while_speaking()
+            LOG.debug("Could not find a station with the query term: " + search_term)
+            return
 
-        # We didn't find any playable stations
-        self.speak_dialog("not.found")
+        # stop the current stream if we have one running
+        if self.audio_state == "playing":
+            self.stop()
+        # Ignore entries that are marked as unavailable
+        self.mpeg_url = match.getAttribute("URL")
+        self.station_name = match.getAttribute("text")
+        # this URL will return audio/x-mpegurl data. This is just a list of URLs to the real streams
+        self.stream_url = self.get_stream_url(self.mpeg_url)
+        self.audio_state = "playing"
+        self.speak_dialog("now.playing", {"station": self.station_name})
         wait_while_speaking()
-        LOG.debug("Could not find a station with the query term: " + search_term)
+        LOG.debug("Station: " + self.station_name)
+        LOG.debug("Station name fuzzy match percent: " + str(perc))
+        LOG.debug("Stream URL: " + self.stream_url)
+        tracklist.append(self.stream_url)
+        self.mediaplayer.add_list(tracklist)
+        self.mediaplayer.play()
 
     def get_stream_url(self, mpegurl):
         res = requests.get(mpegurl)
@@ -206,6 +256,7 @@ class TuneinSkill(CommonPlaySkill):
                     string = f.read().strip()
                 self.regexes[regex] = string
         return self.regexes[regex]
+
 
 def create_skill():
     return TuneinSkill()
