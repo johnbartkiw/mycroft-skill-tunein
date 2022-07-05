@@ -40,6 +40,7 @@ from lingua_franca.parse import match_one
 # Static values for tunein search requests
 base_url = "http://opml.radiotime.com/Search.ashx"
 headers = {}
+MAXALIASES = 5
 
 
 def request_api(search_term):
@@ -106,6 +107,14 @@ class TuneinSkill(CommonPlaySkill):
         self.stream_url = None
         self.mpeg_url = None
         self.regexes = {}
+        self.aliases = {}
+
+    def initialize(self):
+        self.init_websettings()
+        self.settings_change_callback = self.init_websettings
+
+    def init_websettings(self):
+        self.get_aliases()
 
     def CPS_match_query_phrase(self, phrase):
         # Look for regex matches starting from the most specific to the least
@@ -155,15 +164,29 @@ class TuneinSkill(CommonPlaySkill):
         self.find_station(message.data["station"])
         LOG.debug("Station data: " + message.data["station"])
 
-    def apply_aliases(self, search_term):
-        # Allow search terms to be expanded or aliased
-        home = expanduser('~')
-        alias_file = home + '/tunein_aliases.yaml'
-        if path.exists(alias_file):
-            with open(alias_file, 'r') as file:
-                alias_list = yaml.load(file)
-            if search_term in alias_list:
-                search_term = alias_list[search_term]
+    def get_aliases(self):
+        self.aliases.clear()
+        for i in range(0, MAXALIASES):
+            _station = self.settings.get(f"station{i}", False)
+            _alias = self.settings.get(f"alias{i}", False)
+            if _station and _alias:
+                self.aliases[_alias.lower()] = _station.lower()
+
+    def remove_aliases(self, search_term):
+        """ Applies the aliases either defined in the webconfig or using ~/tunein_aliases.yaml (deprecated)"""
+        # backwards compat
+        if not self.aliases:
+            home = expanduser('~')
+            alias_file = home + '/tunein_aliases.yaml'
+            if path.exists(alias_file):
+                with open(alias_file, 'r') as file:
+                    self.aliases = yaml.load(file, Loader=yaml.FullLoader)
+
+        for alias, station in self.aliases.items():
+            if alias in search_term:
+                search_term = search_term.replace(alias, station)
+                LOG.debug(f"Removed alias. Search_term: {search_term}")
+
         return search_term
 
     # Attempt to find the first active station matching the query string
@@ -171,9 +194,7 @@ class TuneinSkill(CommonPlaySkill):
 
         tracklist = []
         retry = True
-        LOG.debug("pre-alias search_term: " + search_term)
-        search_term = self.apply_aliases(search_term)
-        LOG.debug("aliased search_term: " + search_term)
+        search_term = self.remove_aliases(search_term)
 
         dom = request_api(search_term)
         # results are each in their own <outline> tag as defined by OPML (https://en.wikipedia.org/wiki/OPML)
